@@ -1,10 +1,12 @@
-import Login from "./pages/Login";
+
+import SystemApp from "./apps/SystemApp";
+import { BrowserRouter } from "react-router-dom";
 
 const App = () => {
   return (
-    <>
-      <Login />
-    </>
+    <BrowserRouter>
+      <SystemApp />
+    </BrowserRouter>
   );
 };
 
