@@ -9,11 +9,11 @@ import { useState } from "react";
 import Layout from "@/components/Layout";
 import TeamTable from "@/components/Table/TeamTable";
 import PrimaryButton from "@/components/Button/PrimaryButton";
-import AddTeamModal from "@/components/Modal/AddTeamModal";
+import AddTeamModal from "@/components/Modal/Team/AddTeamModal";
 
 
 const Team = () => {
-  const [IsAddModalOpen, setIsAddModalOpen] = useState(false);;
+  const [IsAddModalOpen, setIsAddModalOpen] = useState(false);
   return (
     <>
       <Layout>

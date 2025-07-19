@@ -1,13 +1,22 @@
 import TeamRow from "@/components/Team/TeamRow";
+import { useState } from "react";
+
+import JoinMemberInTeamModal from "@/components/Modal/Team/JoinMemberInTeamModal";
+import EditTeamModal from "@/components/Modal/Team/EditTeamModal";
+import DeleteTeamModal from "@/components/Modal/Team/DeleteTeamModal";
 
 const TeamTable = () => {
-    const teams = [
-        {name: "Rajiv", members: 29},
-        {name: "Antima", members: 25},
-        {name: "Rahul", members: 21},
-        {name: "Amit", members: 22},
-    ];
-    
+  const teams = [
+    { name: "Rajiv", members: 29 },
+    { name: "Antima", members: 25 },
+    { name: "Rahul", members: 21 },
+    { name: "Amit", members: 22 },
+  ];
+
+  const [openTeamIndex, setOpenTeamIndex] = useState(null);
+  const [editTeamIndex, setEditTeamIndex] = useState(null);
+  const [deleteTeamIndex, setDeleteTeamIndex] = useState(null);
+
   return (
     <>
       <div className="relative overflow-x-auto">
@@ -29,12 +38,44 @@ const TeamTable = () => {
             </tr>
           </thead>
           <tbody>
-            {teams.map((team, i) => {
-                return <TeamRow key={i} name={team.name} members={team.members} />
-            })}
+            {teams.map((team, index) => (
+              <TeamRow
+                key={index}
+                name={team.name}
+                members={team.members}
+                onJoinClick={() => setOpenTeamIndex(index)}
+                onEditClick={() => setEditTeamIndex(index)}
+                onDeleteClick={() => setDeleteTeamIndex(index)}
+              />
+            ))}
           </tbody>
         </table>
       </div>
+
+      {openTeamIndex !== null && (
+        <JoinMemberInTeamModal
+          isOpen={true}
+          onClose={() => setOpenTeamIndex(null)}
+          team={teams[openTeamIndex]}
+        />
+      )}
+      
+      {editTeamIndex !== null && (
+        <EditTeamModal
+          isOpen={true}
+          onClose={() => setEditTeamIndex(null)}
+          team={teams[editTeamIndex]}
+        />
+      )}
+
+      {deleteTeamIndex !== null && (
+        <DeleteTeamModal
+          isOpen={true}
+          onClose={() => setDeleteTeamIndex(null)}
+          team={teams[deleteTeamIndex]}
+        />
+      )}
+      
     </>
   );
 };

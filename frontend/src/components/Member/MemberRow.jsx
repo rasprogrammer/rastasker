@@ -1,32 +1,40 @@
 import {
-  AiOutlinePlus,
+  AiFillMerge,
   AiOutlineUserAdd,
   AiFillEdit,
   AiFillDelete,
 } from "react-icons/ai";
-import { useState } from "react";
 
-const TeamRow = ({
+export default function MemberRow({
   name,
-  members,
+  email,
+  contact,
+  team,
+  tasks,
   onJoinClick,
+  onAssignClick,
   onEditClick,
   onDeleteClick,
-}) => {
+}) {
   return (
     <>
       <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
         <th
           scope="row"
-          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+          className="px-6 py-4 font-medium text-gray-9F00 whitespace-nowrap dark:text-white"
         >
           {name}
         </th>
-        <td className="px-6 py-4">{members}</td>
-        <td>
+        <td className="px-6 py-4">{email}</td>
+        <td className="px-6 py-4">{contact}</td>
+        <td className="px-6 py-4">
+          {team ? team : <AiFillMerge className="cursor-pointer text-xl" onClick={onJoinClick} />}
+        </td>
+        <td className="px-6 py-4">{tasks}</td>
+        <td className="px-6 py-4">
           <AiOutlineUserAdd
             className="cursor-pointer text-xl"
-            onClick={onJoinClick}
+            onClick={onAssignClick}
           />
         </td>
         <td className="px-6 py-4">
@@ -44,6 +52,4 @@ const TeamRow = ({
       </tr>
     </>
   );
-};
-
-export default TeamRow;
+}
