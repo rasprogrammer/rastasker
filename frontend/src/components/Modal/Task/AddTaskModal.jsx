@@ -78,9 +78,6 @@ export default function AddTaskModal({ isOpen, onClose }) {
               <div className="mb-6">
                 <AssignMemberInput label={"Assign Member"} id={"assign_member"} memberName={""} />
               </div>
-              <div className="mb-6">
-                <InputFilesField />
-              </div>
             </div>
             
             <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
