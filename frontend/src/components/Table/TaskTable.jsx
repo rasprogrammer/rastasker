@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import TaskRow from "@/components/Task/TaskRow";
 import AssignTaskModal from "@/components/Modal/Task/AssignTaskModal";
-import EditMemberModal from "@/components/Modal/Member/EditMemberModal";
-import DeleteMemberModal from "@/components/Modal/Member/DeleteMemberModal";
+import EditTaskModal from "@/components/Modal/Task/EditTaskModal";
+import DeleteTaskModal from "@/components/Modal/Task/DeleteTaskModal";
 
 export default function TaskTable() {
   const tasks = [
@@ -124,18 +124,18 @@ export default function TaskTable() {
       )}
 
       {editTaskIndex !== null && (
-        <EditMemberModal
+        <EditTaskModal
           isOpen={true}
           onClose={() => setEditTaskIndex(null)}
-          team={members[editTaskIndex]}
+          team={tasks[editTaskIndex]}
         />
       )}
 
       {deleteTaskIndex !== null && (
-        <DeleteMemberModal
+        <DeleteTaskModal
           isOpen={true}
           onClose={() => setDeleteTaskIndex(null)}
-          team={members[deleteTaskIndex]}
+          team={tasks[deleteTaskIndex]}
         />
       )}
     </>
