@@ -1,11 +1,25 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { register } from "@/auth/service";
 
 export default function Register() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    console.log("event > ", event);
-    console.log(formData);
+    register({ formData });
   };
 
   return (
@@ -28,9 +42,11 @@ export default function Register() {
               </label>
               <div className="mt-2">
                 <input
-                  id="name"
-                  name="name"
                   type="text"
+                  name="name"
+                  id="name"
+                  onChange={handleChange}
+                  value={formData.name}
                   required
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
@@ -46,9 +62,11 @@ export default function Register() {
               </label>
               <div className="mt-2">
                 <input
-                  id="email"
-                  name="email"
                   type="email"
+                  name="email"
+                  id="email"
+                  onChange={handleChange}
+                  value={formData.email}
                   required
                   autoComplete="email"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
@@ -67,9 +85,11 @@ export default function Register() {
               </div>
               <div className="mt-2">
                 <input
-                  id="password"
-                  name="password"
                   type="password"
+                  name="password"
+                  id="password"
+                  onChange={handleChange}
+                  value={formData.password}
                   required
                   autoComplete="current-password"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"

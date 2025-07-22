@@ -1,5 +1,5 @@
 import {
-  AiFillMerge,
+  AiFillEye,
   AiOutlineUserAdd,
   AiFillEdit,
   AiFillDelete,
@@ -43,6 +43,8 @@ export default function TaskRow({
         <td className="px-6 py-4">{expiry_date}</td>
         <td className="px-6 py-4">
           <div className="flex space-x-2">
+            <AiFillEye className="text-xl cursor-pointer text-yellow-600" />
+
             <AiFillEdit
               className="cursor-pointer text-xl"
               onClick={onEditClick}
