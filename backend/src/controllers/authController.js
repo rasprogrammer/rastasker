@@ -19,7 +19,10 @@ const register = async (req, res) => {
     if (error) {
         return res.status(409).json({
             success: false,
-            message: 'Invalid input fields',
+            result: null,
+            message: error.message,
+            erorr: error,
+            errorMessage: error.message
         });
     }
 
@@ -29,6 +32,9 @@ const register = async (req, res) => {
         return res.status(409).json({
             success: false,
             message: 'Email already exist',
+            result: null,
+            error: null,
+            errorMessage: null,
         });
     }
 
@@ -59,6 +65,8 @@ const register = async (req, res) => {
 
         return res.status(201).json({
             success: true,
+            error: null,
+            errorMessage: null,
             message: 'User created successfully',
             result: {
                 id: newUser[0].id,
