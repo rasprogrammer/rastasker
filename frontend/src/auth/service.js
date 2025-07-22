@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "@/config/serverApiConfig";
 import errorHandler from "@/request/errorHandler";
+import successHandler from "@/request/successHandler";
 import axios from "axios";
 
 export const register = async ({ formData: registerData }) => {
@@ -12,6 +13,10 @@ export const register = async ({ formData: registerData }) => {
                 password: registerData.password,
             }
         );
+
+        const { status, data } = response;
+
+        successHandler({status, data});
 
         console.log('response > ', response);
     } catch (error) {
