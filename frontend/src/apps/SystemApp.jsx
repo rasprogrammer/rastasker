@@ -1,10 +1,11 @@
 import Login from "@/pages/Login";
 import AuthRouter from "@/router/AuthRouter";
 import AppRouter from "@/router/AppRouter";
+import { useSelector } from "react-redux";
+import { selectAuth } from "@/redux/auth/selector";
 
 const SystemApp = () => {
-  const isLoggedIn = false;
-
+  const { isLoggedIn } = useSelector(selectAuth);
   if (isLoggedIn) {
     return (
       <>

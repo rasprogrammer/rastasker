@@ -4,25 +4,38 @@ import { toast } from "react-hot-toast";
 export default function errorHandler(error) {
 
     if (!navigator.onLine) {
-        toast.info('Cannot connet to the server, Check your internet network');
-        return;
+        toast.info('Cannot connect to the Internet, Check your internet network');
+        return {
+            success: false,
+            result: null,
+            message: 'Cannot connect to the server, Check your internet network'
+        }
     }
 
     const { response } = error;
 
     if (!response) {
         toast.error('Cannot connect to the server, Contact your Account administrator');
-        return;
+        return {
+            success: false,
+            result: null,
+            message: 'Cannot connect to the server, Contact your Account administrator',
+        }
     }
-    
+
     if (response && response.status) {
-        console.log('response in status > ', response);
         const message = response.data && response.data.message;
         const errorText = message || codeMessage[response.status];
-        
+
         toast.error(errorText);
+
+        return response.data;
     } else {
-        console.log('response without status > ', response); 
+        return {
+            success: false,
+            result: null,
+            message: 'Cannot connect to the server, Check your internet network',
+        };
     }
 
 }

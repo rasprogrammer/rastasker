@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const User = require("@/models/User");
 const UserPassword = require("@/models/UserPassword");
@@ -89,6 +90,91 @@ const register = async (req, res) => {
 
 };
 
+const login = async (req, res) => {
+    const { email, password } = req.body;
+    console.log(req.body);
+
+    const objectSchema = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+    });
+
+    const { error } = objectSchema.validate({ email, password });
+
+    if (error) {
+        return res.status(409).json({
+            success: false,
+            result: null,
+            error: error,
+            message: 'Invalid/Missing Credentials.',
+            errorMessage: error.message,
+        });
+    }
+
+    const user = await User.findOne({ email: email, removed: false });
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            result: null,
+            error: null,
+            message: 'No account with this email has been registered.',
+        });
+    }
+
+    if (!user.enabled) {
+        return res.status(404).json({
+            success: false,
+            result: null,
+            error: null,
+            message: 'Your account is disabled, contact your account adminstrator',
+        });
+    }
+
+    const databasePassword = await UserPassword.findOne({ user: user._id, removed: false });
+
+    const isMatch = await bcrypt.compare(databasePassword.salt + password, databasePassword.password);
+    if (isMatch === true) {
+        const token = jwt.sign(
+            { id: user._id, },
+            process.env.JWT_SECRET,
+            { expiresIn: req.body.remember ? 365 * 24 + 'h' : '24h' }
+        );
+
+        await UserPassword.findOneAndUpdate(
+            { user: user._id },
+            { $push: { loggedSessions: token } },
+            {
+                new: true,
+            }
+        ).exec();
+
+        res.status(200).json({
+            success: true,
+            result: {
+                _id: user._id,
+                name: user.name,
+                surname: user.surname,
+                role: user.role,
+                email: user.email,
+                photo: user.photo,
+                token: token,
+                maxAge: req.body.remember ? 365 : null,
+            },
+            message: 'Successfully login user',
+        });
+    } else {
+        return res.status(403).json({
+            success: false,
+            result: null,
+            error: null,
+            message: 'Invalid credentials.',
+        });
+    }
+
+
+};
+
 module.exports = {
-    register
+    register,
+    login
 }

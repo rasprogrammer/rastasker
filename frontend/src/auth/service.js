@@ -15,12 +15,42 @@ export const register = async ({ formData: registerData }) => {
         );
 
         const { status, data } = response;
+        successHandler({ status, data });
 
-        successHandler({status, data});
-
-        console.log('response > ', response);
+        return data;
     } catch (error) {
         console.log('error response > ', error);
-        errorHandler(error);
+        return errorHandler(error);
+    }
+}
+
+export const login = async ({ formData: loginData }) => {
+    try {
+        // console.log('loginData > ',loginData);
+
+        const response = await axios.post(`${API_BASE_URL}auth/login`, {
+            email: loginData.email,
+            password: loginData.password,
+        });
+
+        const { status, data } = response;
+        successHandler({ status, data });
+        return data;
+    } catch (error) {
+        const d = errorHandler(error);
+    }
+};
+
+export const logout = async () => {
+    axios.defaults.withCredentials = true;
+    try {
+        // window.localStorage.clear();
+        const response = await axios.post(`${API_BASE_URL}auth/logout`);
+        const { status, data } = response;
+
+        successHandler({ data, status });
+        return data;
+    } catch (error) {
+        return errorHandler(error);
     }
 }
