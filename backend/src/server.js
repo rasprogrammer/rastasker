@@ -5,7 +5,14 @@ const cors = require("cors");
 const express = require('express');
 const app = express();
 
+// import middlewares
+const authMiddleware = require('./middlewares/authMiddleware');
+const protectRoute = require('./middlewares/protectRoute');
+
+// routers
 const authRouter = require('./routes/auth');
+const teamRouter = require('./routes/team');
+
 
 const { dbConnect } = require('./config/db');
 dbConnect();
@@ -20,6 +27,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth/', authRouter);
+
+app.use('/api/team/', authMiddleware, protectRoute(['admin']), teamRouter);
 
 
 // Unknown route
