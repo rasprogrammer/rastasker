@@ -38,8 +38,21 @@ const userSchema = new mongoose.Schema(
         role: {
             type: String,
             default: 'admin',
-            enum: ['admin', 'user'],
-        }
+            enum: ['admin', 'member'],
+        },
+        assignedTasks: [
+            {
+                task: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Task',
+                    required: true,
+                },
+                assignedAt: {
+                    type: Date,
+                    default: Date.now,
+                }
+            }
+        ]
     },
     {
         timestamps: true
