@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/config/serverApiConfig";
 import errorHandler from "@/request/errorHandler";
 import successHandler from "@/request/successHandler";
+import { getToken, getUserId } from "@/utils/authToken";
 import axios from "axios";
 
 export const register = async ({ formData: registerData }) => {
@@ -42,10 +43,13 @@ export const login = async ({ formData: loginData }) => {
 };
 
 export const logout = async () => {
-    axios.defaults.withCredentials = true;
     try {
-        // window.localStorage.clear();
-        const response = await axios.post(`${API_BASE_URL}auth/logout`);
+        const token = getToken();
+        const id = getUserId();
+        const response = await axios.post(`${API_BASE_URL}auth/logout`, {
+            token: token,
+            _id: id,
+        }); 
         const { status, data } = response;
 
         successHandler({ data, status });

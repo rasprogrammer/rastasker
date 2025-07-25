@@ -8,33 +8,17 @@ import Loading from "../components/Loader/Loading";
 export default function Logout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading } = useSelector(selectAuth);
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  function asyncLogout() {
-    dispatch(logoutAction());
-  }
+  const [isDispatched, setIsDispatched] = useState(false);
+  const { isLoading, isLoggedIn } = useSelector(selectAuth);
 
   useEffect(() => {
-    asyncLogout();
-    navigate('/');
+    if (!isDispatched) {
+      setIsDispatched(true);
+      dispatch(logoutAction()).then(() => {
+        navigate("/");
+      });
+    }
   }, []);
 
-  return (
-    <>
-      <Loading isLoad={isLoading}>Logout</Loading>
-    </>
-  );
+  return <>{/* <Loading isLoad={isLoading}>Logout</Loading> */}</>;
 }

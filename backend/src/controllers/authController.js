@@ -92,7 +92,6 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
 
     const objectSchema = Joi.object({
         email: Joi.string().email().required(),
@@ -174,7 +173,46 @@ const login = async (req, res) => {
 
 };
 
+const logout = async (req, res) => {
+
+    const userId = req.body._id;
+    const token = req.body.token; // Extract the token
+    console.log("token > ", token);
+
+    if (!userId) {
+        return {
+            success: false,
+            result: {},
+            message: 'User id not found',
+        }
+    }
+
+    if (token)
+        await UserPassword.findOneAndUpdate(
+            { user: userId },
+            { $pull: { loggedSessions: token } },
+            {
+                new: true,
+            }
+        ).exec();
+    else
+        await UserPassword.findOneAndUpdate(
+            { user: userId },
+            { loggedSessions: [] },
+            {
+                new: true,
+            }
+        ).exec();
+
+    return res.json({
+        success: true,
+        result: {},
+        message: 'Successfully logout',
+    });
+}
+
 module.exports = {
     register,
-    login
+    login,
+    logout,
 }
