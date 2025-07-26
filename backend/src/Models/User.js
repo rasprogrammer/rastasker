@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
         surname: {
             type: String,
         },
+        phone: {
+            type: String,
+            required: true,
+        },
         photo: {
             type: String,
             trim: true,
@@ -39,6 +43,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: 'admin',
             enum: ['admin', 'member'],
+        },
+        team: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team',
         },
         assignedTasks: [
             {

@@ -6,210 +6,114 @@ const jwt = require('jsonwebtoken');
 const User = require("@/models/User");
 const UserPassword = require("@/models/UserPassword");
 
+const { registerSchema, loginSchema } = require('@/validations/authValidation');
+const { successResponse, errorResponse } = require('@/helpers/responseHelper');
+
 const register = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
 
-    const objectSchema = Joi.object({
-        name: Joi.string().required(),
-        email: Joi.string().email({ tlds: { allow: true } }).required(),
-        password: Joi.string().required(),
-    });
-
-    const { error } = objectSchema.validate({ name, email, password });
+    const { error } = registerSchema.validate({ name, email, password, phone });
 
     if (error) {
-        return res.status(409).json({
-            success: false,
-            result: null,
-            message: error.message,
-            erorr: error,
-            errorMessage: error.message
-        });
+        return errorResponse(res, 409, error.details[0].message);
     }
 
-    // check email already exist or not 
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-        return res.status(409).json({
-            success: false,
-            message: 'Email already exist',
-            result: null,
-            error: null,
-            errorMessage: null,
-        });
-    }
-
-    // register new user 
     const session = await mongoose.startSession();
     try {
-        await session.startTransaction();
+        const existingUser = await User.findOne({ email: email });
+        if (existingUser) return errorResponse(res, 409, 'Email already exist');
 
-        const newUser = await User.create([{
-            name: name,
-            email: email,
+        session.startTransaction();
+
+        const [newUser] = await User.create([{
+            name,
+            email,
+            phone,
             removed: false,
             enabled: true,
         }], { session });
 
         const salt = await bcrypt.genSalt(10);
-        const userPasswordInstance = new UserPassword();
-        const hashedPassword = userPasswordInstance.generateHash(salt, password);
+        const hashedPassword = bcrypt.hashSync(salt + password, 10);
 
-        const newUserPassword = await UserPassword.create([{
-            user: newUser[0]._id,
+        await UserPassword.create([{
+            user: newUser._id,
             password: hashedPassword,
-            salt: salt
+            salt
         }], { session });
 
         await session.commitTransaction();
         session.endSession();
 
-        return res.status(201).json({
-            success: true,
-            error: null,
-            errorMessage: null,
-            message: 'User created successfully',
-            result: {
-                id: newUser[0].id,
-                name: newUser[0].name,
-                email: newUser[0].email,
-            }
-        })
-    } catch (error) {
-        session.abortTransaction();
-        session.endSession();
-
-        return res.status(500).json({
-            success: false,
-            result: null,
-            message: 'user creatation failed',
-            erorr: error,
-            errorMessage: error.message,
+        return successResponse(res, 201, 'User created successfully', {
+            id: newUser._id,
+            name: newUser.name,
+            email: newUser.email
         });
+    } catch (error) {
+        if (session?.inTransaction()) await session.abortTransaction();
+        session?.endSession();
+        return errorResponse(res, 500, 'User creation failed', error.message);
     }
 
 };
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
 
-    const objectSchema = Joi.object({
-        email: Joi.string().email().required(),
-        password: Joi.string().required(),
-    });
+    const { error } = loginSchema.validate({ email, password });
 
-    const { error } = objectSchema.validate({ email, password });
+    if (error) return errorResponse(res, 409, error.details[0].message);
 
-    if (error) {
-        return res.status(409).json({
-            success: false,
-            result: null,
-            error: error,
-            message: 'Invalid/Missing Credentials.',
-            errorMessage: error.message,
+    try {
+        const user = await User.findOne({ email, removed: false });
+        if (!user) return errorResponse(res, 404, 'Email not registered');
+        if (!user.enabled) return errorResponse(res, 403, 'Account disabled');
+
+        const dbPass = await UserPassword.findOne({ user: user._id, removed: false });
+        const isMatch = bcrypt.compareSync(dbPass.salt + password, dbPass.password);
+
+        if (!isMatch) return errorResponse(res, 403, 'Invalid credentials');
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: remember ? '8760h' : '24h'
         });
+
+        await UserPassword.updateOne({ user: user._id }, { $push: { loggedSessions: token } });
+
+        return successResponse(res, 200, 'Successfully logged in', {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            token,
+            maxAge: remember ? 365 : null,
+        });
+    } catch (err) {
+        return errorResponse(res, 500, 'Login failed', err.message);
     }
-
-    const user = await User.findOne({ email: email, removed: false });
-    if (!user) {
-        return res.status(404).json({
-            success: false,
-            result: null,
-            error: null,
-            message: 'No account with this email has been registered.',
-        });
-    }
-
-    if (!user.enabled) {
-        return res.status(404).json({
-            success: false,
-            result: null,
-            error: null,
-            message: 'Your account is disabled, contact your account adminstrator',
-        });
-    }
-
-    const databasePassword = await UserPassword.findOne({ user: user._id, removed: false });
-
-    const isMatch = await bcrypt.compare(databasePassword.salt + password, databasePassword.password);
-    if (isMatch === true) {
-        const token = jwt.sign(
-            { id: user._id, },
-            process.env.JWT_SECRET,
-            { expiresIn: req.body.remember ? 365 * 24 + 'h' : '24h' }
-        );
-
-        await UserPassword.findOneAndUpdate(
-            { user: user._id },
-            { $push: { loggedSessions: token } },
-            {
-                new: true,
-            }
-        ).exec();
-
-        res.status(200).json({
-            success: true,
-            result: {
-                _id: user._id,
-                name: user.name,
-                surname: user.surname,
-                role: user.role,
-                email: user.email,
-                photo: user.photo,
-                token: token,
-                maxAge: req.body.remember ? 365 : null,
-            },
-            message: 'Successfully login user',
-        });
-    } else {
-        return res.status(403).json({
-            success: false,
-            result: null,
-            error: null,
-            message: 'Invalid credentials.',
-        });
-    }
-
 
 };
 
 const logout = async (req, res) => {
+    const { _id: userId } = req.body;
+    if (!userId) return errorResponse(res, 400, 'User ID is required');
 
-    const userId = req.body._id;
-    const token = req.body.token; // Extract the token
-    console.log("token > ", token);
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
 
-    if (!userId) {
-        return {
-            success: false,
-            result: {},
-            message: 'User id not found',
-        }
+    if (!token) return errorResponse(res, 401, 'Access Denied. No token provided.');
+
+    try {
+        const update = token
+            ? { $pull: { loggedSessions: token } }
+            : { $set: { loggedSessions: [] } };
+
+        await UserPassword.updateOne({ user: userId }, update);
+        return successResponse(res, 200, 'Successfully logged out');
+    } catch (err) {
+        return errorResponse(res, 500, 'Logout failed', err.message);
     }
-
-    if (token)
-        await UserPassword.findOneAndUpdate(
-            { user: userId },
-            { $pull: { loggedSessions: token } },
-            {
-                new: true,
-            }
-        ).exec();
-    else
-        await UserPassword.findOneAndUpdate(
-            { user: userId },
-            { loggedSessions: [] },
-            {
-                new: true,
-            }
-        ).exec();
-
-    return res.json({
-        success: true,
-        result: {},
-        message: 'Successfully logout',
-    });
-}
+};
 
 module.exports = {
     register,

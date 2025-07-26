@@ -1,6 +1,20 @@
 const Team = require('@/models/Team');
 const Joi = require('joi');
 
+const getTeams = async (req, res) => {
+    const allTeam = await Team.find();
+    const teams = allTeam.map(team => ({
+        name: team.name,
+        memberCount: team.members.length,
+    }));
+
+    return res.status(200).json({
+        success: true,
+        result: teams,
+        message: 'Success',
+    });
+};
+
 const getAllTeam = async (req, res) => {
     const allTeam = await Team.find();
 

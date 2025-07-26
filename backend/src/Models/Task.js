@@ -11,7 +11,7 @@ const taskSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        descriptions: {
+        description: {
             type: String,
             required: true,
         },
@@ -20,6 +20,9 @@ const taskSchema = new mongoose.Schema(
             enum: ['design', 'development', 'bugfix', 'documentation', 'maintenance', 'requirement'],
             default: 'requirement'
         },
+        files: [{
+            type: String,
+        }],
     },
     {
         timestamps: true,

@@ -12,6 +12,8 @@ const protectRoute = require('./middlewares/protectRoute');
 // routers
 const authRouter = require('./routes/auth');
 const teamRouter = require('./routes/team');
+const memberRouter = require('./routes/member');
+const taskRouter = require('./routes/task');
 
 
 const { dbConnect } = require('./config/db');
@@ -30,7 +32,10 @@ app.use('/api/auth/', authRouter);
 
 app.use('/api/team/', authMiddleware, protectRoute(['admin']), teamRouter);
 
+app.use('/api/member/', authMiddleware, protectRoute(['admin']), memberRouter);
 
+app.use('/api/task/', authMiddleware, protectRoute(['admin']), taskRouter);
+    
 // Unknown route
 app.use((req, res) => {
     res.status(404).json({

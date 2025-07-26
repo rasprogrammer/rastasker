@@ -1,23 +1,36 @@
 const jwt = require('jsonwebtoken');
 const User = require('@/models/User');
+const UserPassword = require('@/models/UserPassword');
 
 const authMiddleware = async (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
+
     if (!token) {
         return res.status(401).json({ message: 'Access Denied. No token provided.' });
     }
+
     try {
-        const secret = process.env.JWT_SECRET;
-        const decoded = jwt.verify(token, secret);
-        const u = await User.findOne({_id: decoded.id, removed: false});
-        if (!u) {
-            return res.status(401).json({ message: 'Access Denied. User not exists.' });    
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // 1. Check if user still exists
+        const user = await User.findOne({ _id: decoded.id, removed: false });
+        if (!user) {
+            return res.status(401).json({ message: 'Access Denied. User does not exist.' });
         }
-        req.user = u; // Attach user data to request
+
+        // 2. Check if the token is still in loggedSessions (i.e., not logged out)
+        const userPassword = await UserPassword.findOne({ user: user._id });
+        if (!userPassword?.loggedSessions?.includes(token)) {
+            return res.status(401).json({ message: 'Access Denied. Token expired or user logged out.' });
+        }
+
+        // Attach user info to request
+        req.user = user;
         next();
     } catch (err) {
-        return res.status(403).json({ message: 'Invalid token.' });
+        return res.status(403).json({ message: 'Invalid or expired token.' });
     }
-}
+};
 
 module.exports = authMiddleware;
