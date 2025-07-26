@@ -36,6 +36,22 @@ const validateMemberInput = (req, res, data, edit = false) => {
 
 }
 
+const addMemberValidation = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    phone: Joi.string().required(),
+    team: Joi.string().optional(),
+});
+
+const editMemberValidation = Joi.object({
+    name: Joi.string().required(),
+    phone: Joi.string().required(),
+    team: Joi.string().optional(),
+});
+
 module.exports = {
-    validateMemberInput
+    validateMemberInput,
+    addMemberValidation,
+    editMemberValidation,
 }

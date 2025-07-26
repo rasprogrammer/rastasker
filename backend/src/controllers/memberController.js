@@ -3,26 +3,25 @@ const mongoose = require('mongoose');
 const Team = require('@/models/Team');
 const User = require('@/models/User');
 const UserPassword = require('@/models/UserPassword');
-const { validateMemberInput } = require('@/validations/memberValidation');
+const { validateMemberInput, addMemberValidation, editMemberValidation } = require('@/validations/memberValidation');
+const { successResponse, errorResponse } = require('@/helpers/responseHelper');
 
 const getAllMembers = async (req, res) => {
-    const members = await User.find();
-
-    return res.status(200).json({
-        success: true,
-        result: members,
-        message: 'success',
-    })
-}
+    try {
+        const members = await User.find();
+        return successResponse(res, 200, 'Members fetched successfully', members);
+    } catch (error) {
+        return errorResponse(res, 500, 'Failed to fetch members', error.message);
+    }
+};
 
 const getMembers = async (req, res) => {
-    const members = await User.find({ parentuserid: req.user._id });
-
-    return res.status(200).json({
-        success: true,
-        result: members,
-        message: 'success',
-    })
+    try {
+        const members = await User.find({ parentuserid: req.user._id });
+        return successResponse(res, 200, 'Members fetched successfully', members);
+    } catch (error) {
+        return errorResponse(res, 500, 'Failed to fetch members', error.message);
+    }
 }
 
 const verifyEmailExist = async (req, res, { email }) => {
@@ -45,8 +44,10 @@ const verifyEmailExist = async (req, res, { email }) => {
 const addMember = async (req, res) => {
     const { name, email, password, phone, team } = req.body;
 
-    const validateMember = validateMemberInput(req, res, { name, email, password, phone, team });
-    if (validateMember) return;
+    const { error } = addMemberValidation.validate({ name, email, password, phone, team });
+    if (error) {
+        return errorResponse(res, 409, error.message, error);
+    }
 
     const emailExists = await verifyEmailExist(req, res, { email });
     if (emailExists) return;
@@ -96,57 +97,34 @@ const addMember = async (req, res) => {
         transactionCommitted = true;
         session.endSession();
 
-        return res.status(201).json({
-            success: true,
-            error: null,
-            errorMessage: null,
-            message: 'Member created successfully',
-            result: {
-                id: newUser[0].id,
-                name: newUser[0].name,
-                email: newUser[0].email,
-            }
-        })
+        return successResponse(res, 201, 'Member created successfully', {
+            id: newUser[0]._id,
+            name: newUser[0].name,
+            email: newUser[0].email,
+        });
     } catch (error) {
         if (!transactionCommitted)
             session.abortTransaction();
         session.endSession();
 
-        return res.status(500).json({
-            success: false,
-            result: null,
-            message: 'Member creatation failed',
-            erorr: error,
-            errorMessage: error.message,
-        });
+        return errorResponse(res, 500, 'Member creation failed', error.message);
     }
 };
 
 const editMember = async (req, res) => {
     const memberId = req.params.id;
     if (!memberId) {
-        return res.status(409).json({
-            success: false,
-            result: null,
-            message: 'Member id not found',
-        });
+        return errorResponse(res, 409, 'Member id not found');
     }
 
     const { name, phone, team } = req.body;
 
-    const validateMember = validateMemberInput(req, res, { name, phone, team }, true);
-    if (validateMember) return;
+    const { error } = editMemberValidation.validate({ name, phone, team });
+    if (error) return errorResponse(res, 409, error.message, error);
 
     try {
-
         const member = await User.findById(memberId);
-        if (!member) {
-            return res.status(409).json({
-                success: false,
-                result: null,
-                message: 'Member not found',
-            });
-        }
+        if (!member) return errorResponse(res, 409, 'Member not found');
 
         // update member data
         const updatedMember = await User.updateOne({ _id: memberId }, {
@@ -156,63 +134,38 @@ const editMember = async (req, res) => {
             }
         });
 
-        return res.status(200).json({
-            success: true,
-            result: updatedMember,
-            message: 'Member update successfully',
+        return successResponse(res, 200, 'Member updated successfully', {
+            id: memberId,
+            name: name,
+            phone: phone,
+            team: team || member.team,
         });
-
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            result: null,
-            message: error.message,
-            erorr: error,
-            errorMessage: error.message,
-        });
+        return errorResponse(res, 500, 'Failed to update member', error.message);
     }
 };
 
 const deleteMember = async (req, res) => {
     const memberId = req.params.id;
-    if (!memberId) {
-        return res.status(409).json({
-            success: false,
-            result: null,
-            message: 'Member id not found',
-        });
-    }
+    if (!memberId) return errorResponse(res, 409, 'Member id is required');
 
     try {
-
         const member = await User.findById(memberId);
         if (!member || member.parentuserid != req.user._id) {
-            return res.status(409).json({
-                success: false,
-                result: null,
-                message: 'Member not found',
-            });
+            return errorResponse(res, 409, 'Member not found or unauthorized access');
         }
 
         // delete member data
         const deleteMember = await User.deleteOne({ _id: memberId });
 
-        return res.status(200).json({
-            success: true,
-            result: deleteMember,
-            message: 'Member delete successfully',
+        return successResponse(res, 200, 'Member deleted successfully', {
+            id: memberId,
+            name: member.name,
+            email: member.email,
         });
-
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            result: null,
-            message: error.message,
-            erorr: error,
-            errorMessage: error.message,
-        });
+        return errorResponse(res, 500, 'Failed to delete member', error.message);
     }
-
 };
 
 module.exports = {
