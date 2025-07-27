@@ -3,12 +3,14 @@ const router = express.Router();
 
 const teamController = require('@/controllers/teamController');
 
-router.route('/').get(teamController.getAllTeam);
+router.route('/all').get(teamController.getAllTeam);
+
+router.route('/').get(teamController.getTeams);
 
 router.route('/').post(teamController.addTeam);
 
-router.route('/').put(teamController.editTeam);
+router.route('/:id').put(teamController.editTeam);
 
-router.route('/').delete(teamController.deleteTeam);
+router.route('/:id').delete(teamController.deleteTeam);
 
 module.exports = router;
