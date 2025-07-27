@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { login } from "@/redux/auth/actions";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAuth } from "@/redux/auth/selector";
-import Loading from "../components/Loader/Loading";
+import InputField from "@/components/Authentication/InputField";
+import Submit from "@/components/Authentication/Submit";
+import Loading from "@/components/Loader/Loading";
+import GoogleOauth from "@/components/Authentication/GoogleOauth";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -39,49 +42,21 @@ export default function Login() {
 
           <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <form onSubmit={handleSubmit} method="POST" className="space-y-6">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm/6 font-medium text-gray-900"
-                >
-                  Email address
-                </label>
-                <div className="mt-2">
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    onChange={handleChange}
-                    value={formData.email}
-                    required
-                    autoComplete="email"
-                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  />
-                </div>
-              </div>
+              <InputField
+                type="email"
+                label="Email"
+                id="email"
+                onChange={handleChange}
+                value={formData.email}
+              />
 
-              <div>
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm/6 font-medium text-gray-900"
-                  >
-                    Password
-                  </label>
-                </div>
-                <div className="mt-2">
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    onChange={handleChange}
-                    value={formData.password}
-                    required
-                    autoComplete="current-password"
-                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  />
-                </div>
-              </div>
+              <InputField
+                type="password"
+                label="Password"
+                id="password"
+                onChange={handleChange}
+                value={formData.password}
+              />
 
               <div>
                 <div className="flex items-center justify-between">
@@ -111,12 +86,7 @@ export default function Login() {
               </div>
 
               <div>
-                <button
-                  type="submit"
-                  className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs cursor-pointer hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  Sign in
-                </button>
+                <Submit label="Sign in" />
               </div>
             </form>
 
@@ -129,6 +99,9 @@ export default function Login() {
                 Register here
               </Link>
             </p>
+            <div className="flex items-center justify-center">
+              <GoogleOauth />
+            </div>
           </div>
         </div>
       </Loading>

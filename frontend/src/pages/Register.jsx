@@ -1,9 +1,9 @@
-import { FcGoogle } from "react-icons/fc";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { register, googleAuth } from "@/auth/service";
-import InputField from "@/components/Register/InputField";
-import Submit from "@/components/Register/Submit";
+import GoogleOauth from "@/components/Authentication/GoogleOauth";
+import InputField from "@/components/Authentication/InputField";
+import Submit from "@/components/Authentication/Submit";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -24,10 +24,6 @@ export default function Register() {
   const handleSubmit = (event) => {
     event.preventDefault();
     register({ formData });
-  };
-
-  const handleGoogleAuth = () => {
-    googleAuth();
   };
 
   return (
@@ -86,11 +82,9 @@ export default function Register() {
                 Login here
               </Link>
             </p>
-            <p className="flex items-center justify-center">
-              <div onClick={handleGoogleAuth} className="py-3 px-5 bg-gray-200">
-                <FcGoogle className="text-3xl " />
-              </div>
-            </p>
+            <div className="flex items-center justify-center">
+              <GoogleOauth />
+            </div>
           </div>
         </div>
       </div>

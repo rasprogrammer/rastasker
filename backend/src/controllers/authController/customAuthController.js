@@ -94,28 +94,52 @@ const login = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-    const { _id: userId } = req.body;
-    if (!userId) return errorResponse(res, 400, 'User ID is required');
-
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(' ')[1];
 
     if (!token) return errorResponse(res, 401, 'Access Denied. No token provided.');
 
     try {
-        const update = token
-            ? { $pull: { loggedSessions: token } }
-            : { $set: { loggedSessions: [] } };
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        await UserPassword.updateOne({ user: userId }, update);
+        // 1. Check if user still exists
+        const user = await User.findOne({ _id: decoded.id, removed: false });
+        if (!user) {
+            return res.status(401).json({ message: 'Access Denied. User does not exist.' });
+        }
+
+        if (!user.googleId) {
+            const userPassword = await UserPassword.findOne({ user: user._id });
+            const update = token
+                ? { $pull: { loggedSessions: token } }
+                : { $set: { loggedSessions: [] } };
+
+            await UserPassword.updateOne({ user: user._id }, update);
+            return successResponse(res, 200, 'Successfully logged out');
+        }
         return successResponse(res, 200, 'Successfully logged out');
     } catch (err) {
         return errorResponse(res, 500, 'Logout failed', err.message);
     }
 };
 
+const userData = async (req, res) => {
+    const token = req.body.token || req.headers.authorization?.split(' ')[1];
+    if (!token) return errorResponse(res, 401, 'Access Denied. No token provided.');
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('-password -__v');
+        if (!user) return errorResponse(res, 404, 'User not found');
+
+        return successResponse(res, 200, 'User data retrieved successfully', user);
+    } catch (err) {
+        return errorResponse(res, 500, 'Failed to retrieve user data', err.message);
+    }
+}
+
 module.exports = {
     register,
     login,
     logout,
+    userData
 }

@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout as logoutAction } from "@/redux/auth/actions";
-import { useSelector, useDispatch } from "react-redux";
-import { selectAuth } from "@/redux/auth/selector";
-import Loading from "../components/Loader/Loading";
+import { useDispatch } from "react-redux";
 
 export default function Logout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isDispatched, setIsDispatched] = useState(false);
-  const { isLoading, isLoggedIn } = useSelector(selectAuth);
+  const hasLogedOut = useRef(false);
 
   useEffect(() => {
-    if (!isDispatched) {
-      setIsDispatched(true);
+    if (!hasLogedOut.current) {
+      hasLogedOut.current = true;
       dispatch(logoutAction()).then(() => {
         navigate("/");
       });

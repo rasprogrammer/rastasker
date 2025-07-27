@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/config/serverApiConfig";
 import errorHandler from "@/request/errorHandler";
 import successHandler from "@/request/successHandler";
-import { getToken, getUserId } from "@/utils/authToken";
+import { getToken, loggedData } from "@/utils/authToken";
 import axios from "axios";
 
 export const register = async ({ formData: registerData }) => {
@@ -16,7 +16,6 @@ export const register = async ({ formData: registerData }) => {
 
         return data;
     } catch (error) {
-        console.log('error response > ', error);
         return errorHandler(error);
     }
 }
@@ -39,13 +38,16 @@ export const login = async ({ formData: loginData }) => {
 export const logout = async () => {
     try {
         const token = getToken();
-        const id = getUserId();
-        const response = await axios.post(`${API_BASE_URL}auth/logout`, {
-            token: token,
-            _id: id,
+        if (!token) {
+            return errorHandler({ message: 'No token provided' });
+        }
+        
+        const response = await axios.post(`${API_BASE_URL}auth/logout`, { }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         });
         const { status, data } = response;
-
         successHandler({ data, status });
         return data;
     } catch (error) {
