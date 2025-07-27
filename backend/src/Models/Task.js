@@ -9,20 +9,27 @@ const taskSchema = new mongoose.Schema(
         },
         title: {
             type: String,
-            required: true,
         },
         description: {
             type: String,
-            required: true,
         },
         taskType: {
             type: String,
-            enum: ['design', 'development', 'bugfix', 'documentation', 'maintenance', 'requirement'],
+            enum: ['issue', 'complain', 'development', 'requirement', 'feature', 'bugfix', 'enhancement'],
             default: 'requirement'
         },
         files: [{
             type: String,
         }],
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        assignedTo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
     },
     {
         timestamps: true,

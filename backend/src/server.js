@@ -34,7 +34,7 @@ app.use('/api/team/', authMiddleware, protectRoute(['admin']), teamRouter);
 
 app.use('/api/member/', authMiddleware, protectRoute(['admin']), memberRouter);
 
-app.use('/api/task/', authMiddleware, protectRoute(['admin']), taskRouter);
+app.use('/api/task/', authMiddleware, taskRouter);
     
 // Unknown route
 app.use((req, res) => {
