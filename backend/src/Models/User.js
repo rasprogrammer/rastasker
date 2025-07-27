@@ -28,7 +28,6 @@ const userSchema = new mongoose.Schema(
         },
         phone: {
             type: String,
-            required: true,
         },
         photo: {
             type: String,
@@ -47,6 +46,9 @@ const userSchema = new mongoose.Schema(
         team: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Team',
+        },
+        googleId: {
+            type: String,
         },
         assignedTasks: [
             {

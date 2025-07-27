@@ -19,10 +19,11 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ message: 'Access Denied. User does not exist.' });
         }
 
-        // 2. Check if the token is still in loggedSessions (i.e., not logged out)
-        const userPassword = await UserPassword.findOne({ user: user._id });
-        if (!userPassword?.loggedSessions?.includes(token)) {
-            return res.status(401).json({ message: 'Access Denied. Token expired or user logged out.' });
+        if (!user.googleId) {
+            const userPassword = await UserPassword.findOne({ user: user._id });
+            if (!userPassword?.loggedSessions?.includes(token)) {
+                return res.status(401).json({ message: 'Access Denied. Token expired or user logged out.' });
+            }
         }
 
         // Attach user info to request

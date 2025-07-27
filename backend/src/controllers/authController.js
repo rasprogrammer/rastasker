@@ -91,7 +91,6 @@ const login = async (req, res) => {
     } catch (err) {
         return errorResponse(res, 500, 'Login failed', err.message);
     }
-
 };
 
 const logout = async (req, res) => {
