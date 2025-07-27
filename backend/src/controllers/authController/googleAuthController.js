@@ -16,20 +16,15 @@ const googleCallback = async (req, res) => {
     passport.authenticate('google', { session: false, failureRedirect: '/login' })(req, res, async () => {
         req.user = req.user || req.newUser;
         console.log('Google callback:', req.user);
+        if (!req.user) {
+            return errorResponse(res, 400, 'User not found or registration failed');
+        }
         // JWT token issue
         const token = jwt.sign({ id: req.user._id, email: req.user.email }, process.env.JWT_SECRET, {
             expiresIn: '24h'
         });
 
-        return successResponse(res, 200, 'Login successful', {
-            user: {
-                id: req.user._id,
-                email: req.user.email,
-                name: req.user.name,
-                photo: req.user.photo
-            },
-            token
-        });
+        return res.redirect('http://localhost:5173/auth/google/callback?token=' + token);
     });
 };
 

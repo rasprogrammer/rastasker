@@ -8,11 +8,7 @@ export const register = async ({ formData: registerData }) => {
     try {
         const response = await axios.post(
             `${API_BASE_URL}auth/register`,
-            {
-                name: registerData.name,
-                email: registerData.email,
-                password: registerData.password,
-            }
+            registerData
         );
 
         const { status, data } = response;
@@ -27,8 +23,6 @@ export const register = async ({ formData: registerData }) => {
 
 export const login = async ({ formData: loginData }) => {
     try {
-        // console.log('loginData > ',loginData);
-
         const response = await axios.post(`${API_BASE_URL}auth/login`, {
             email: loginData.email,
             password: loginData.password,
@@ -49,10 +43,26 @@ export const logout = async () => {
         const response = await axios.post(`${API_BASE_URL}auth/logout`, {
             token: token,
             _id: id,
-        }); 
+        });
         const { status, data } = response;
 
         successHandler({ data, status });
+        return data;
+    } catch (error) {
+        return errorHandler(error);
+    }
+}
+
+export const googleAuth = async () => {
+    window.location.href = `${API_BASE_URL}auth/google/register`;
+}
+
+export const googleCallback = async (token) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}auth/google/callback?token=${token}`);
+        const { status, data } = response;
+
+        successHandler({ status, data });
         return data;
     } catch (error) {
         return errorHandler(error);
