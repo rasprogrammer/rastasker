@@ -28,7 +28,7 @@ export default function MemberRow({
         <td className="px-6 py-4">{email}</td>
         <td className="px-6 py-4">{contact}</td>
         <td className="px-6 py-4">
-          {team ? team : <AiFillMerge className="cursor-pointer text-xl" onClick={onJoinClick} />}
+          {/* {team ? team : <AiFillMerge className="cursor-pointer text-xl" onClick={onJoinClick} />} */}
         </td>
         <td className="px-6 py-4">{tasks}</td>
         <td className="px-6 py-4">

@@ -1,8 +1,16 @@
 import PrimaryButton from "@/components/Button/PrimaryButton";
 import SecondaryButton from "@/components/Button/SecondaryButton";
+import { useDispatch } from "react-redux";
+import { deleteTeam } from "@/redux/team/actions";
 
-export default function DeleteTeamModal({ isOpen, onClose }) {
+export default function DeleteTeamModal({ isOpen, onClose, team }) {
   if (!isOpen) return null;
+  const dispatch = useDispatch();
+  
+  const handleSubmit = () => {
+    dispatch(deleteTeam({id: team._id}));
+    onClose();
+  }
 
   return (
     <>
@@ -43,7 +51,7 @@ export default function DeleteTeamModal({ isOpen, onClose }) {
             </div>
             {/* Modal footer */}
             <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-              <PrimaryButton>Confirm</PrimaryButton>
+              <PrimaryButton onClick={handleSubmit}>Confirm</PrimaryButton>
               <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
             </div>
           </div>

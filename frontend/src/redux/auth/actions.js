@@ -8,7 +8,6 @@ export const login = ({ formData }) => async (dispatch) => {
 
     const data = await authService.login({ formData });
 
-
     if (data && data.success === true) {
         const auth_state = {
             current: data.result,

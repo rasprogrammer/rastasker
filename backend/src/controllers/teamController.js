@@ -12,7 +12,11 @@ const verifyTeamNameExist = async (req, name) => {
 const getTeams = async (req, res) => {
     try {
         const teams = await Team.find({ owner: req.user._id });
-        return successResponse(res, 200, 'Teams fetched successfully', teams);
+        const teamsWithCount = teams.map(team => ({
+            ...team.toObject(), // convert Mongoose document to plain object
+            members: team.members.length
+        }));
+        return successResponse(res, 200, 'Teams fetched successfully', teamsWithCount);
     } catch (error) {
         return errorResponse(res, 500, error.message);
     }

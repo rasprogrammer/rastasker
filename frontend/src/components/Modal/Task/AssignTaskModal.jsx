@@ -70,7 +70,7 @@ export default function AssignTaskModal({ isOpen, onClose }) {
                   label="Select Team"
                   type={"text"}
                   id={"team"}
-                  options={teams}
+                  // options={teams}
                 />
               </div>
 

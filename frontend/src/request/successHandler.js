@@ -1,15 +1,18 @@
 import codeMessage from "./codeMessage";
 import { toast } from "react-hot-toast";
 
-const successHandler = (response) => {
-    console.log('result > ', response);
-
+const successHandler = (response, NotifyOnSuccess=true) => {
     const { data }  = response;
     if (data && data.success === true) {
         const message = data.message;
-        const successText = message || codeMessage[response.status];
+        let successText = typeof message === 'string'
+            ? message
+            : codeMessage[response.status] || JSON.stringify(message) || 'Success';
 
-        toast.success(successText);
+        if (NotifyOnSuccess) {
+            console.log('ok ', successText);
+            toast.success(successText.toString());
+        }
     } else {
         const message = response.data && response.data.message
         const errorText = message || codeMessage[response.status];

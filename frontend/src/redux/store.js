@@ -1,8 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
+import rootReducer from './rootReducer';
 import storePersist from './storePersist';
-
-import { reducer as authReducer } from '@/redux/auth';
 
 const AUTH_INITIAL_STATE = {
     current: {},
@@ -16,9 +15,7 @@ const auth_state = storePersist.get('auth') ? storePersist.get('auth') : AUTH_IN
 const initalState = { auth: auth_state };
 
 const store = configureStore({
-    reducer: {
-        'auth': authReducer
-    },
+    reducer: rootReducer,
     preloadedState: initalState,
 });
 

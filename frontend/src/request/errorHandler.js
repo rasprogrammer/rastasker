@@ -23,9 +23,19 @@ export default function errorHandler(error) {
         }
     }
 
+    console.log('upper jwt');
+    if (response?.data?.jwtExpired) {
+        console.log(' in jwt ');
+        window.localStorage.removeItem('auth');
+        window.localStorage.removeItem('settings');
+        window.localStorage.setItem('isLogout', JSON.stringify({ isLogout: true }));
+        window.location.href = '/';
+    }
+
     if (response && response.status) {
         const message = response.data && response.data.message;
         const errorText = message || codeMessage[response.status];
+        console.log('error Text > ', error.name);
 
         toast.error(errorText);
 

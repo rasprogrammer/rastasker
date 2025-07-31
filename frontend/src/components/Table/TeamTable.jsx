@@ -1,17 +1,20 @@
 import TeamRow from "@/components/Team/TeamRow";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { selectTeam } from "@/redux/team/selector";
+import { fetchTeams } from "@/redux/team/actions";
 
 import JoinMemberInTeamModal from "@/components/Modal/Team/JoinMemberInTeamModal";
 import EditTeamModal from "@/components/Modal/Team/EditTeamModal";
 import DeleteTeamModal from "@/components/Modal/Team/DeleteTeamModal";
 
 const TeamTable = () => {
-  const teams = [
-    { name: "Rajiv", members: 29 },
-    { name: "Antima", members: 25 },
-    { name: "Rahul", members: 21 },
-    { name: "Amit", members: 22 },
-  ];
+  const dispatch = useDispatch();
+  const teams = useSelector(selectTeam);
+
+  useEffect(() => {
+    dispatch(fetchTeams());
+  }, []);
 
   const [openTeamIndex, setOpenTeamIndex] = useState(null);
   const [editTeamIndex, setEditTeamIndex] = useState(null);
@@ -38,16 +41,18 @@ const TeamTable = () => {
             </tr>
           </thead>
           <tbody>
-            {teams.map((team, index) => (
-              <TeamRow
-                key={index}
-                name={team.name}
-                members={team.members}
-                onJoinClick={() => setOpenTeamIndex(index)}
-                onEditClick={() => setEditTeamIndex(index)}
-                onDeleteClick={() => setDeleteTeamIndex(index)}
-              />
-            ))}
+            {teams.map((team, index) => {
+              return (
+                <TeamRow
+                  key={index}
+                  name={team.name}
+                  members={team.members}
+                  onJoinClick={() => setOpenTeamIndex(index)}
+                  onEditClick={() => setEditTeamIndex(index)}
+                  onDeleteClick={() => setDeleteTeamIndex(index)}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -59,7 +64,7 @@ const TeamTable = () => {
           team={teams[openTeamIndex]}
         />
       )}
-      
+
       {editTeamIndex !== null && (
         <EditTeamModal
           isOpen={true}
@@ -75,7 +80,6 @@ const TeamTable = () => {
           team={teams[deleteTeamIndex]}
         />
       )}
-      
     </>
   );
 };

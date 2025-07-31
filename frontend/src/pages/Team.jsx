@@ -11,7 +11,6 @@ import TeamTable from "@/components/Table/TeamTable";
 import PrimaryButton from "@/components/Button/PrimaryButton";
 import AddTeamModal from "@/components/Modal/Team/AddTeamModal";
 
-
 const Team = () => {
   const [IsAddModalOpen, setIsAddModalOpen] = useState(false);
   return (

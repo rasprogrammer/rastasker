@@ -4,6 +4,7 @@ const UserPassword = require('@/models/UserPassword');
 
 const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
+    console.log('runnn....');
     const token = authHeader?.split(' ')[1];
 
     if (!token) {
@@ -30,6 +31,14 @@ const authMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                success: true,
+                result: null,
+                message: 'Expired Token',
+                jwtExpired: true,
+            })
+        }
         return res.status(403).json({ message: 'Invalid or expired token.' });
     }
 };
